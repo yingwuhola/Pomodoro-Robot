@@ -6,3 +6,4 @@ By default, it runs in 25-minute focus sessions ⏱️ followed by 5-minute brea
   <img src=“src/cover_2.jpg" width="23%">
   <img src=“src/cover_3.jpg" width="23%">
 </p>
+<img src=“src/cover_1.jpg” alt="" width="100"> 
