@@ -34,8 +34,6 @@ jobs:
       - name: Decode keystore (.jks) from secret
         run: |
           echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > android/my-key.jks
-
-      
       - name: Create android/key.properties
         run: |
           cat > android/key.properties <<EOF
@@ -44,7 +42,6 @@ jobs:
           keyAlias=${{ secrets.ANDROID_KEY_ALIAS }}
           storeFile=android/my-key.jks
           EOF
-     
       - name: Print key.properties
         run: cat android/key.properties
 
