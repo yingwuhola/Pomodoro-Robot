@@ -5,3 +5,4 @@ By default, it runs in 25-minute focus sessions ⏱️ followed by 5-minute brea
 <img src=“docs/cover1.jpg” alt="" width="100"> 
 # installation
 Download the latest APK release directly from the [Releases](https://github.com/yingwuhola/Pomodoro-Robot/releases) pages.
+Install the APK on your Android device.
