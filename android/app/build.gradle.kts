@@ -1,5 +1,6 @@
 import java.util.Properties
 
+// ① 读取签名参数
 val keystoreProperties = Properties().apply {
     val keystorePropertiesFile = rootProject.file("android/key.properties")
     if (keystorePropertiesFile.exists()) {
@@ -32,7 +33,7 @@ android {
         versionName = flutter.versionName
     }
 
-
+    // ② 关键：release签名配置
     signingConfigs {
         create("release") {
             keyAlias = keystoreProperties["keyAlias"] as String?
@@ -45,7 +46,7 @@ android {
     buildTypes {
         getByName("release") {
             signingConfig = signingConfigs.getByName("release")
-            isMinifyEnabled = false 
+            isMinifyEnabled = false
             isShrinkResources = false
         }
     }
