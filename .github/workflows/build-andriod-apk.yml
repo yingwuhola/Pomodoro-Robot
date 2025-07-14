@@ -44,6 +44,9 @@ jobs:
           keyAlias=${{ secrets.ANDROID_KEY_ALIAS }}
           storeFile=android/my-key.jks
           EOF
+     
+      - name: Print key.properties
+        run: cat android/key.properties
 
       - name: Install yq
         uses: mikefarah/yq@v4.42.1
