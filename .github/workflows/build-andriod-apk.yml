@@ -31,6 +31,20 @@ jobs:
       #- name: Decode android/key.properties
       #  run: echo "${{ secrets.KEY_PROPERTIES_PROD }}" | base64 --decode > android/key.properties
 
+      - name: Decode keystore (.jks) from secret
+        run: |
+          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > android/my-key.jks
+
+      
+      - name: Create android/key.properties
+        run: |
+          cat > android/key.properties <<EOF
+          storePassword=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          keyPassword=${{ secrets.ANDROID_KEY_PASSWORD }}
+          keyAlias=${{ secrets.ANDROID_KEY_ALIAS }}
+          storeFile=android/my-key.jks
+          EOF
+
       - name: Install yq
         uses: mikefarah/yq@v4.42.1
 
