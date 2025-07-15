@@ -28,7 +28,7 @@ Meet PomoBot — your tiny desk companion that helps you stay on track with the 
 * Display: SD1309 OLED Screen
 * Inputs: Push Button
 <br>Circuit Diagram
-<img src="src/curcuit.jpg" alt="" width="200">
+<img src="src/curcuit.jpg" alt="" width="400">
 
 ### 2. Machine Learning Model
    <br>Detects typing activity based on sound
