@@ -16,24 +16,24 @@ Meet PomoBot — your tiny desk companion that helps you stay on track with the 
 # Installation
 ## Hardware  
 1. Circuit Design  
-*Microcontroller:  ESP32
-*Sensors:
-VEML7700 Light Sensor
-SGP30 eCO₂ & TVOC Air Quality Sensor
-INMP441 Microphone (for typing sound detection)
-*Actuators:
-N20 DC Motor (for movement)
-TB6612 Motor Driver
-Speaker (for gentle alerts or reminders)
-*Display: SD1309 OLED Screen
-*Inputs: Push Button
+* Microcontroller:  ESP32
+* Sensors:
+  VEML7700 Light Sensor
+  SGP30 eCO₂ & TVOC Air Quality Sensor
+  INMP441 Microphone (for typing sound detection)
+* Actuators:
+  N20 DC Motor (for movement)
+  TB6612 Motor Driver
+  Speaker (for gentle alerts or reminders)
+* Display: SD1309 OLED Screen
+* Inputs: Push Button
 Circuit Diagram
 
 2. Machine Learning Model
-Detects typing activity based on sound
-Input: Audio from microphone
-Output: “Typing” or “Not Typing”
-Link: https://studio.edgeimpulse.com/studio/716593
+   Detects typing activity based on sound
+   Input: Audio from microphone
+   Output: “Typing” or “Not Typing”
+   Link: https://studio.edgeimpulse.com/studio/716593
 
 ## Software  
 * Download the latest APK release directly from the [Releases](https://github.com/yingwuhola/Pomodoro-Robot/releases) pages.  
