@@ -4,7 +4,7 @@ By default, it runs in 25-minute focus sessions followed by 5-minute breaks, mak
 <img src="docs/cover1.jpg" alt="" width="300">  
 # Features
 * 🍅 Pomodoro Timer
-  25 minutes of focus time and 5 minutes of break time. You can also customize the duration and number of rounds through the app.
+  <br>25 minutes of focus time and 5 minutes of break time. You can also customize the duration and number of rounds through the app.
 * 🤖 Desk Companion
   During focus time, it stays quietly by your side. During breaks, it moves around to remind you to relax and take a short rest.
 * ⌨️ Typing Activity Detection
