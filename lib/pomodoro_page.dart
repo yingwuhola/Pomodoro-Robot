@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_blue_plus/flutter_blue_plus.dart' as fbp;
-import 'package:permission_handler/permission_handler.dart';
+import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
 import 'bluetooth_service.dart';
@@ -29,6 +28,10 @@ class _PomodoroPageState extends State<PomodoroPage>
   late AnimationController _pulseController;
   late Animation<double> _pulseAnimation;
 
+  // Stream subscriptions
+  StreamSubscription<bool>? _connectionSubscription;
+  StreamSubscription<Map<String, String>>? _statusSubscription;
+
   @override
   void initState() {
     super.initState();
@@ -54,7 +57,7 @@ class _PomodoroPageState extends State<PomodoroPage>
 
   void _listenToBluetoothStatus() {
     // 监听状态更新
-    PomodoroBluetoothService().statusStream.listen((status) {
+    _statusSubscription = PomodoroBluetoothService().statusStream.listen((status) {
       if (mounted) {
         setState(() {
           currentState = _getStateName(int.tryParse(status['STATE'] ?? '0') ?? 0);
@@ -66,13 +69,11 @@ class _PomodoroPageState extends State<PomodoroPage>
       }
     });
     
-    // 监听连接状态变化并强制刷新UI
-    PomodoroBluetoothService().connectionStream.listen((connected) {
-      print("Connection status changed: $connected");
+    // 监听连接状态变化
+    _connectionSubscription = PomodoroBluetoothService().connectionStream.listen((connected) {
+      print("Connection status changed in PomodoroPage: $connected");
       if (mounted) {
-        setState(() {
-          // 强制刷新UI
-        });
+        setState(() {});
         
         if (!connected) {
           // 断开连接时重置状态
@@ -94,6 +95,8 @@ class _PomodoroPageState extends State<PomodoroPage>
   @override
   void dispose() {
     _pulseController.dispose();
+    _connectionSubscription?.cancel();
+    _statusSubscription?.cancel();
     super.dispose();
   }
 
@@ -136,6 +139,9 @@ class _PomodoroPageState extends State<PomodoroPage>
 
   @override
   Widget build(BuildContext context) {
+    bool isConnected = PomodoroBluetoothService().isConnected;
+    print("Building PomodoroPage UI - isConnected: $isConnected");
+    
     return Scaffold(
       backgroundColor: Colors.grey[50],
       appBar: AppBar(
@@ -146,10 +152,10 @@ class _PomodoroPageState extends State<PomodoroPage>
         actions: [
           IconButton(
             icon: Icon(
-              PomodoroBluetoothService().isConnected ? Icons.bluetooth_connected : Icons.bluetooth,
+              isConnected ? Icons.bluetooth_connected : Icons.bluetooth,
               color: Colors.white,
             ),
-            onPressed: PomodoroBluetoothService().isConnected 
+            onPressed: isConnected 
                 ? () => PomodoroBluetoothService().disconnect() 
                 : _showConnectionDialog,
           ),
@@ -173,66 +179,74 @@ class _PomodoroPageState extends State<PomodoroPage>
   }
 
   Widget _buildConnectionCard() {
-    // 使用StreamBuilder来实时更新连接状态
-    return StreamBuilder<bool>(
-      stream: PomodoroBluetoothService().connectionStream,
-      initialData: PomodoroBluetoothService().isConnected,
-      builder: (context, snapshot) {
-        bool isConnected = snapshot.data ?? false;
-        
-        return Card(
-          elevation: 6,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          child: Container(
-            padding: EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(16),
-              gradient: LinearGradient(
-                colors: isConnected 
-                    ? [Colors.green[400]!, Colors.green[600]!]
-                    : [Colors.grey[400]!, Colors.grey[600]!],
+    bool isConnected = PomodoroBluetoothService().isConnected;
+    
+    return Card(
+      elevation: 6,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Container(
+        padding: EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          gradient: LinearGradient(
+            colors: isConnected 
+                ? [Colors.green[400]!, Colors.green[600]!]
+                : [Colors.grey[400]!, Colors.grey[600]!],
+          ),
+        ),
+        child: Row(
+          children: [
+            AnimatedBuilder(
+              animation: _pulseAnimation,
+              builder: (context, child) {
+                return Transform.scale(
+                  scale: isConnected ? _pulseAnimation.value : 1.0,
+                  child: Icon(
+                    isConnected ? Icons.bluetooth_connected : Icons.bluetooth_disabled,
+                    size: 40,
+                    color: Colors.white,
+                  ),
+                );
+              },
+            ),
+            SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    isConnected ? 'Connected' : 'Not Connected',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                  Text(
+                    isConnected ? 'Robot is ready' : 'Tap to connect',
+                    style: TextStyle(fontSize: 14, color: Colors.white70),
+                  ),
+                ],
               ),
             ),
-            child: Row(
-              children: [
-                AnimatedBuilder(
-                  animation: _pulseAnimation,
-                  builder: (context, child) {
-                    return Transform.scale(
-                      scale: isConnected ? _pulseAnimation.value : 1.0,
-                      child: Icon(
-                        isConnected ? Icons.bluetooth_connected : Icons.bluetooth_disabled,
-                        size: 40,
-                        color: Colors.white,
-                      ),
-                    );
-                  },
-                ),
-                SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        isConnected ? 'Connected' : 'Not Connected',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
-                      Text(
-                        isConnected ? 'Robot is ready' : 'Tap to connect',
-                        style: TextStyle(fontSize: 14, color: Colors.white70),
-                      ),
-                    ],
+            if (!isConnected)
+              GestureDetector(
+                onTap: _showConnectionDialog,
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    'Connect',
+                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                   ),
                 ),
-              ],
-            ),
-          ),
-        );
-      },
+              ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -305,6 +319,8 @@ class _PomodoroPageState extends State<PomodoroPage>
   }
 
   Widget _buildControlButtons() {
+    bool isConnected = PomodoroBluetoothService().isConnected;
+    
     return Column(
       children: [
         Row(
@@ -314,8 +330,9 @@ class _PomodoroPageState extends State<PomodoroPage>
               icon: Icons.play_arrow,
               label: "Start",
               color: Colors.green,
-              onPressed: PomodoroBluetoothService().isConnected && !isRunning ? () {
+              onPressed: isConnected && !isRunning ? () {
                 PomodoroBluetoothService().sendCommand("START");
+                // 延迟获取状态，确保ESP32处理完毕
                 Future.delayed(Duration(milliseconds: 500), () {
                   PomodoroBluetoothService().sendCommand("GET_STATUS");
                 });
@@ -325,7 +342,7 @@ class _PomodoroPageState extends State<PomodoroPage>
               icon: isPaused ? Icons.play_arrow : Icons.pause,
               label: isPaused ? "Resume" : "Pause",
               color: Colors.orange,
-              onPressed: PomodoroBluetoothService().isConnected && isRunning 
+              onPressed: isConnected && isRunning 
                   ? () => PomodoroBluetoothService().sendCommand(isPaused ? "RESUME" : "PAUSE") 
                   : null,
             ),
@@ -333,7 +350,7 @@ class _PomodoroPageState extends State<PomodoroPage>
               icon: Icons.stop,
               label: "Stop",
               color: Colors.red,
-              onPressed: PomodoroBluetoothService().isConnected && isRunning 
+              onPressed: isConnected && isRunning 
                   ? () => PomodoroBluetoothService().sendCommand("STOP") 
                   : null,
             ),
@@ -343,7 +360,7 @@ class _PomodoroPageState extends State<PomodoroPage>
         SizedBox(
           width: double.infinity,
           child: ElevatedButton.icon(
-            onPressed: PomodoroBluetoothService().isConnected 
+            onPressed: isConnected 
                 ? () => PomodoroBluetoothService().sendCommand("MOVE_FORWARD") 
                 : null,
             icon: Icon(Icons.directions_walk),
@@ -535,8 +552,9 @@ class _PomodoroPageState extends State<PomodoroPage>
                         onPressed: PomodoroBluetoothService().isScanning ? null : () async {
                           setDialogState(() {});
                           try {
+                            await PomodoroBluetoothService().requestPermissions();
                             await PomodoroBluetoothService().startScan();
-                            // 每秒刷新UI来显示新发现的设备
+                            // 定期刷新对话框以显示新发现的设备
                             Timer.periodic(Duration(seconds: 1), (timer) {
                               if (!PomodoroBluetoothService().isScanning) {
                                 timer.cancel();
@@ -562,7 +580,7 @@ class _PomodoroPageState extends State<PomodoroPage>
                       Padding(
                         padding: EdgeInsets.symmetric(vertical: 8),
                         child: Text(
-                          "Looking for devices...",
+                          "Searching for devices...",
                           style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                         ),
                       ),
@@ -582,7 +600,7 @@ class _PomodoroPageState extends State<PomodoroPage>
                                   if (!PomodoroBluetoothService().isScanning) ...[
                                     SizedBox(height: 8),
                                     Text(
-                                      "Make sure your robot is powered on\nand click 'Start Scan'",
+                                      "Make sure your robot is powered on\nand try scanning again",
                                       style: TextStyle(fontSize: 12, color: Colors.grey[500]),
                                       textAlign: TextAlign.center,
                                     ),
@@ -593,7 +611,7 @@ class _PomodoroPageState extends State<PomodoroPage>
                           : ListView.builder(
                               itemCount: PomodoroBluetoothService().foundDevices.length,
                               itemBuilder: (context, index) {
-                                fbp.BluetoothDevice device = PomodoroBluetoothService().foundDevices[index];
+                                BluetoothDevice device = PomodoroBluetoothService().foundDevices[index];
                                 return Card(
                                   margin: EdgeInsets.symmetric(vertical: 2),
                                   child: ListTile(
@@ -614,6 +632,7 @@ class _PomodoroPageState extends State<PomodoroPage>
                                       try {
                                         await PomodoroBluetoothService().connectToDevice(device);
                                         _showSnackBar("Connected successfully!");
+                                        setState(() {});
                                       } catch (e) {
                                         _showSnackBar("Connection failed: $e");
                                       }
@@ -627,6 +646,14 @@ class _PomodoroPageState extends State<PomodoroPage>
                 ),
               ),
               actions: [
+                if (PomodoroBluetoothService().isScanning)
+                  TextButton(
+                    onPressed: () async {
+                      await PomodoroBluetoothService().stopScan();
+                      setDialogState(() {});
+                    },
+                    child: Text("Stop Scan"),
+                  ),
                 TextButton(
                   onPressed: () {
                     PomodoroBluetoothService().stopScan();

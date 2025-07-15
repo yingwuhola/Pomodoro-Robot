@@ -1,0 +1,17 @@
+# Dart/Pub
+.dart_tool/
+.packages
+
+# Flutter/Dart/Pub related
+.buildlog/
+.flutter-plugins
+.flutter-plugins-dependencies
+.melos_tool/
+
+# Build outputs
+build/
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+
+# VS Code
+.vscode/

@@ -1,4 +1,4 @@
-import 'package:flutter_blue_plus/flutter_blue_plus.dart' as fbp;
+import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'dart:async';
 
@@ -8,13 +8,13 @@ class PomodoroBluetoothService {
   PomodoroBluetoothService._internal();
 
   // Bluetooth variables
-  fbp.BluetoothDevice? connectedDevice;
-  fbp.BluetoothCharacteristic? commandCharacteristic;
-  fbp.BluetoothCharacteristic? statusCharacteristic;
-  fbp.BluetoothCharacteristic? sensorCharacteristic;
+  BluetoothDevice? connectedDevice;
+  BluetoothCharacteristic? commandCharacteristic;
+  BluetoothCharacteristic? statusCharacteristic;
+  BluetoothCharacteristic? sensorCharacteristic;
   bool isConnected = false;
   bool isScanning = false;
-  List<fbp.BluetoothDevice> foundDevices = [];
+  List<BluetoothDevice> foundDevices = [];
 
   // Stream controllers
   final StreamController<Map<String, String>> _statusController = 
@@ -24,9 +24,9 @@ class PomodoroBluetoothService {
   final StreamController<bool> _connectionController = 
       StreamController<bool>.broadcast();
 
-  // Timers
+  // Timers and subscriptions
   Timer? statusTimer;
-  StreamSubscription<List<fbp.ScanResult>>? _scanSubscription;
+  StreamSubscription<List<ScanResult>>? scanSubscription;
 
   // Getters for streams
   Stream<Map<String, String>> get statusStream => _statusController.stream;
@@ -50,26 +50,26 @@ class PomodoroBluetoothService {
 
     try {
       // 先停止任何正在进行的扫描
-      await fbp.FlutterBluePlus.stopScan();
+      await FlutterBluePlus.stopScan();
       
-      if (await fbp.FlutterBluePlus.isSupported == false) {
+      if (await FlutterBluePlus.isSupported == false) {
         throw Exception("Bluetooth not supported");
       }
 
-      if (await fbp.FlutterBluePlus.isOn == false) {
+      if (await FlutterBluePlus.isOn == false) {
         throw Exception("Please turn on Bluetooth");
       }
 
       // 添加小延迟确保蓝牙准备就绪
       await Future.delayed(Duration(milliseconds: 500));
 
-      // 取消之前的监听
-      _scanSubscription?.cancel();
+      // 取消之前的订阅
+      scanSubscription?.cancel();
 
       // 设置扫描监听
-      _scanSubscription = fbp.FlutterBluePlus.scanResults.listen((results) {
+      scanSubscription = FlutterBluePlus.scanResults.listen((results) {
         print("Scan results: ${results.length} devices found");
-        for (fbp.ScanResult result in results) {
+        for (ScanResult result in results) {
           String deviceName = result.device.platformName;
           print("Found device: '$deviceName' - ${result.device.remoteId}");
           
@@ -86,8 +86,8 @@ class PomodoroBluetoothService {
         }
       });
 
-      // 开始扫描，设置15秒超时
-      await fbp.FlutterBluePlus.startScan(
+      // 开始扫描
+      await FlutterBluePlus.startScan(
         timeout: Duration(seconds: 15),
       );
       
@@ -98,7 +98,7 @@ class PomodoroBluetoothService {
       isScanning = false;
       throw e;
     } finally {
-      // 15秒后自动停止
+      // 15秒后自动停止扫描
       Future.delayed(Duration(seconds: 15), () {
         if (isScanning) {
           isScanning = false;
@@ -110,8 +110,8 @@ class PomodoroBluetoothService {
   Future<void> stopScan() async {
     print("Stopping scan...");
     try {
-      await fbp.FlutterBluePlus.stopScan();
-      _scanSubscription?.cancel();
+      await FlutterBluePlus.stopScan();
+      scanSubscription?.cancel();
     } catch (e) {
       print("Error stopping scan: $e");
     }
@@ -119,7 +119,7 @@ class PomodoroBluetoothService {
     print("Scan stopped");
   }
 
-  Future<void> connectToDevice(fbp.BluetoothDevice device) async {
+  Future<void> connectToDevice(BluetoothDevice device) async {
     try {
       // 连接前先停止扫描
       await stopScan();
@@ -127,11 +127,11 @@ class PomodoroBluetoothService {
       print("Connecting to device: ${device.platformName}");
       await device.connect();
       
-      List<fbp.BluetoothService> services = await device.discoverServices();
+      List<BluetoothService> services = await device.discoverServices();
       
-      for (fbp.BluetoothService service in services) {
+      for (BluetoothService service in services) {
         if (service.uuid.toString().contains("12345678-1234-1234-1234-123456789abc")) {
-          for (fbp.BluetoothCharacteristic characteristic in service.characteristics) {
+          for (BluetoothCharacteristic characteristic in service.characteristics) {
             String uuid = characteristic.uuid.toString();
             
             if (uuid.contains("87654321-4321-4321-4321-cba987654321")) {
@@ -151,6 +151,10 @@ class PomodoroBluetoothService {
 
       connectedDevice = device;
       isConnected = true;
+      
+      // 通知UI连接状态已更改
+      print("Connection successful - sending notification");
+      _connectionController.add(true);
 
       // 定期获取状态和传感器数据
       statusTimer = Timer.periodic(Duration(seconds: 3), (timer) {
@@ -162,6 +166,7 @@ class PomodoroBluetoothService {
     } catch (e) {
       print("Connection failed: $e");
       isConnected = false;
+      _connectionController.add(false);
       throw e;
     }
   }
@@ -190,6 +195,7 @@ class PomodoroBluetoothService {
     sensorCharacteristic = null;
     
     // 通知UI连接状态已更改
+    print("Disconnection complete - sending notification");
     _connectionController.add(false);
     
     print("Disconnected successfully");
@@ -199,14 +205,19 @@ class PomodoroBluetoothService {
     if (commandCharacteristic != null && isConnected) {
       try {
         await commandCharacteristic!.write(command.codeUnits);
+        print("Command sent: $command");
       } catch (e) {
         print("Command failed: $e");
       }
+    } else {
+      print("Cannot send command - connected: $isConnected, characteristic: ${commandCharacteristic != null}");
     }
   }
 
   void _onStatusReceived(List<int> value) {
     String statusString = String.fromCharCodes(value);
+    print("Status received: $statusString");
+    
     Map<String, String> statusMap = {};
     List<String> pairs = statusString.split(',');
     for (String pair in pairs) {
@@ -220,6 +231,8 @@ class PomodoroBluetoothService {
 
   void _onSensorReceived(List<int> value) {
     String sensorString = String.fromCharCodes(value);
+    print("Sensor data received: $sensorString");
+    
     Map<String, String> sensorMap = {};
     List<String> pairs = sensorString.split(',');
     for (String pair in pairs) {
@@ -233,7 +246,7 @@ class PomodoroBluetoothService {
 
   void dispose() {
     disconnect();
-    _scanSubscription?.cancel();
+    scanSubscription?.cancel();
     _statusController.close();
     _sensorController.close();
     _connectionController.close();
