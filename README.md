@@ -15,7 +15,7 @@ Meet PomoBot — your tiny desk companion that helps you stay on track with the 
 
 # Installation
 ## Hardware  
-1. Circuit Design  
+### 1. Circuit Design  
 * Microcontroller:  ESP32
 * Sensors:
   <br>VEML7700 Light Sensor
@@ -28,8 +28,9 @@ Meet PomoBot — your tiny desk companion that helps you stay on track with the 
 * Display: SD1309 OLED Screen
 * Inputs: Push Button
 <br>Circuit Diagram
+<img src="src/curcuit.jpg" alt="" width="200">
 
-2. Machine Learning Model
+### 2. Machine Learning Model
    <br>Detects typing activity based on sound
    <br>Input: Audio from microphone
    <br>Output: “Typing” or “Not Typing”
