@@ -4,13 +4,13 @@ Meet PomoBot — your tiny desk companion that helps you stay on track with the 
 <img src="docs/cover1.jpg" alt="" width="300">  
 
 # Features
-## * ⏱️ Pomodoro Timer
+* ⏱️ Pomodoro Timer
   <br>25 minutes of focus time and 5 minutes of break time. You can also customize the duration and number of rounds through the app.
-## * 🤝 Desk Companion
+* 🤝 Desk Companion
   <br>During focus time, it stays quietly by your side. During breaks, it moves around to remind you to relax and take a short rest.
-## * ⌨️ Typing Activity Detection
+* ⌨️ Typing Activity Detection
   <br>Built-in machine learning detects typing sounds. If no activity is detected for a while, it gently prompts you to get back on track.
-## * 🌱 Study Environment Monitoring
+* 🌱 Study Environment Monitoring
   <br>A light sensor ensures proper brightness, while a CO₂ sensor alerts you when it’s time to open a window.
 
 # Installation
@@ -31,9 +31,9 @@ Circuit Diagram
 
 2. Machine Learning Model
    Detects typing activity based on sound
-   Input: Audio from microphone
-   Output: “Typing” or “Not Typing”
-   Link: https://studio.edgeimpulse.com/studio/716593
+   <br>Input: Audio from microphone
+   <br>Output: “Typing” or “Not Typing”
+   <br>Link: https://studio.edgeimpulse.com/studio/716593
 
 ## Software  
 * Download the latest APK release directly from the [Releases](https://github.com/yingwuhola/Pomodoro-Robot/releases) pages.  
