@@ -48,7 +48,7 @@ Meet PomoBot — your tiny desk companion that helps you stay on track with the 
 * Install the APK on your Android device. 
 
 
-<img src="src/app_1.jpg" alt="" width="200"> <img src="src/app_2.jpg" alt="" width="200">
+<img src="src/app_6.JPG" alt="" width="200"> <img src="src/app_1.JPG" alt="" width="200"> <img src="src/app_2.jpg" alt="" width="200"> <img src="src/app_3.jpg" alt="" width="200"> <img src="src/app_4.JPG" alt="" width="200"> <img src="src/app_5.JPG" alt="" width="200">
 * BLE Bluetooth Connection
 * Pomodoro Start/Pause Control
 * Custom Time Settings
