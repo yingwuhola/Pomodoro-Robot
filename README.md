@@ -17,7 +17,7 @@ Meet PomoBot — your tiny desk companion that helps you stay on track with the 
   <br>Built-in machine learning detects typing sounds. If no activity is detected for a while, it gently prompts you to get back on track.  
 
 ### * 🌱 Study Environment Monitoring
-<img src="src/sensors.JPG" alt="" width="300" >
+<img src="src/sensors.JPG" alt="" width="300" > <img src="src/cover_light.JPG" alt="" width="300" > <img src="src/cover_air.JPG" alt="" width="300" >
   <br>A light sensor ensures proper brightness, while a CO₂ sensor alerts you when it’s time to open a window.
 
 # Installation
