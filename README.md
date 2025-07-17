@@ -1,7 +1,9 @@
 # PomoBot 🤖 — Your Desk Companion
 Meet PomoBot — your tiny desk companion that helps you stay on track with the Pomodoro Technique🍅, keeping you focused and productive all day.  
 
-<img src="src/cover_5.jpg" alt="" width="400" >. 
+<img src="src/cover_5.jpg" alt="" width="400" >  
+
+Introduction Video: https://youtu.be/2wCO7o7NCIg
 
 # 🌟 Features
 ### * ⏱️ Pomodoro Timer.  
